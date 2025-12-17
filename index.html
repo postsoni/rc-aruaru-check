@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCあるある共感チェック | ぽすとそに工房</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Klee One', cursive;
+            background: linear-gradient(135deg, #f5e6d3 0%, #e8d4b8 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* 紙のテクスチャ効果 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0,0,0,0.02) 2px,
+                    rgba(0,0,0,0.02) 3px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fffef9;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 
+                0 10px 40px rgba(0,0,0,0.15),
+                inset 0 0 100px rgba(0,0,0,0.02);
+            position: relative;
+            z-index: 2;
+            border: 1px solid #d4b896;
+        }
+
+        /* ノートの穴 */
+        .container::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent 20px,
+                #e8d4b8 20px,
+                #e8d4b8 30px
+            );
+        }
+
+        h1 {
+            text-align: center;
+            color: #6b4423;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0 rgba(255,255,255,0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #8b6239;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .header-links {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(255,248,220,0.5);
+            border-radius: 8px;
+            border: 2px dashed #d4b896;
+        }
+
+        .header-links a {
+            display: inline-block;
+            margin: 5px 10px;
+            color: #6b4423;
+            text-decoration: none;
+            padding: 8px 15px;
+            background: #fff9e6;
+            border-radius: 5px;
+            border: 1px solid #d4b896;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+
+        .header-links a:hover {
+            background: #f5e6d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            color: #6b4423;
+            font-size: 1.4em;
+            margin: 30px 0 15px 0;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #d4b896;
+        }
+
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checklist li {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255,253,245,0.8);
+            border-radius: 5px;
+            border-left: 4px solid #d4b896;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .checklist li:hover {
+            background: #fffef9;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateX(5px);
+        }
+
+        .checklist input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            margin-right: 15px;
+            cursor: pointer;
+            accent-color: #8b6239;
+        }
+
+        .checklist label {
+            cursor: pointer;
+            color: #5a4a3a;
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
+
+        .result-btn {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #8b6239 0%, #6b4423 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-family: 'Klee One', cursive;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(107,68,35,0.3);
+            transition: all 0.3s;
+        }
+
+        .result-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(107,68,35,0.4);
+        }
+
+        .result-btn:active {
+            transform: translateY(0);
+        }
+
+        #result {
+            display: none;
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #fff9e6 0%, #fffef9 100%);
+            border-radius: 10px;
+            border: 3px solid #d4b896;
+        }
+
+        .result-score {
+            font-size: 3em;
+            color: #6b4423;
+            margin: 20px 0;
+            text-shadow: 2px 2px 0 rgba(212,184,150,0.3);
+        }
+
+        .result-level {
+            font-size: 2em;
+            color: #8b6239;
+            margin: 15px 0;
+        }
+
+        .result-comment {
+            font-size: 1.2em;
+            color: #5a4a3a;
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+
+        .share-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        .share-btn {
+            padding: 12px 25px;
+            border: 2px solid #d4b896;
+            border-radius: 8px;
+            background: white;
+            color: #6b4423;
+            text-decoration: none;
+            font-family: 'Klee One', cursive;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .share-btn:hover {
+            background: #f5e6d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .other-games {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px dashed #d4b896;
+        }
+
+        .other-games h3 {
+            text-align: center;
+            color: #6b4423;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .game-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .game-link {
+            padding: 15px;
+            background: rgba(255,253,245,0.8);
+            border: 2px solid #d4b896;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #6b4423;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .game-link:hover {
+            background: #fffef9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .game-link-title {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .game-link-desc {
+            font-size: 0.9em;
+            color: #8b6239;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px dashed #d4b896;
+            color: #8b6239;
+            font-size: 0.9em;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: white;
+            color: #6b4423;
+            border: 2px solid #d4b896;
+            border-radius: 8px;
+            text-decoration: none;
+            font-family: 'Klee One', cursive;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #f5e6d3;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.6em;
+            }
+
+            .subtitle {
+                font-size: 0.95em;
+            }
+
+            .section-title {
+                font-size: 1.2em;
+            }
+
+            .checklist label {
+                font-size: 0.95em;
+            }
+
+            .result-score {
+                font-size: 2.5em;
+            }
+
+            .result-level {
+                font-size: 1.5em;
+            }
+
+            .share-buttons {
+                flex-direction: column;
+            }
+
+            .share-btn {
+                width: 100%;
+            }
+
+            .game-links {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 RCあるある共感チェック</h1>
+        <p class="subtitle">あなたはどれだけRC民？</p>
+
+        <div class="header-links">
+            <a href="https://postsoni.github.io/" target="_blank">🏠 ホームページ</a>
+            <a href="https://x.com/postsoni" target="_blank">🐦 X (Twitter)</a>
+        </div>
+
+        <div id="checklist-container">
+            <!-- 作業あるある -->
+            <h2 class="section-title">🔧 作業あるある</h2>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="q1">
+                    <label for="q1">ネジを1本落として30分探したことがある</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q2">
+                    <label for="q2">「ちょっと調整」が3時間になる</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q3">
+                    <label for="q3">工具箱が年々増え続けている</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q4">
+                    <label for="q4">写真撮るとき思ったら妙に画角にこだわり始める</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q5">
+                    <label for="q5">バラした部品の位置をやたら正確に置きたがるor箱に分ける</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q6">
+                    <label for="q6">「予備パーツ」が本体より多い</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q7">
+                    <label for="q7">朝から作業してたら夜になっていた</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q8">
+                    <label for="q8">どうでもいいところからネジが出現する</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q9">
+                    <label for="q9">疲れているときに結束バンドを逆に入れたことがある</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q10">
+                    <label for="q10">ちょっと休憩のはずが動画を見たり写真を見たり、違うことをしている</label>
+                </li>
+            </ul>
+
+            <!-- メンテナンスあるある -->
+            <h2 class="section-title">🛠️ メンテナンスあるある</h2>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="q11">
+                    <label for="q11">バッテリーが無いと思ったら重なってるだけ</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q12">
+                    <label for="q12">調整しきったと思ったら走行後もう調整している</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q13">
+                    <label for="q13">〇〇オイルが異常に増えていく</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q14">
+                    <label for="q14">バックラッシュ用の紙を持っている</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q15">
+                    <label for="q15">ピンセットで挟んだネジがパチッという音とともにどこかに消えたことがある</label>
+                </li>
+            </ul>
+
+            <!-- 購入・買い物あるある -->
+            <h2 class="section-title">💰 購入・買い物あるある</h2>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="q16">
+                    <label for="q16">「念のため」で買ったパーツが山積み</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q17">
+                    <label for="q17">予備買わなきゃと思って買って帰ってきたらすでにその部品もある</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q18">
+                    <label for="q18">送料無料にするために余計なものを買う</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q19">
+                    <label for="q19">Amazonの欲しいものリストの半分がラジコンや工具関係で埋まる</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q20">
+                    <label for="q20">「今月は買わない」という決まりごとは露と消える</label>
+                </li>
+            </ul>
+
+            <!-- 走行・フライトあるある -->
+            <h2 class="section-title">🏎️ 走行・フライトあるある</h2>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="q21">
+                    <label for="q21">ラジコンカー・飛行機・ヘリ、と全て網羅している</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q22">
+                    <label for="q22">風が強い日に最初に感じることは砂や模型の心配事</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q23">
+                    <label for="q23">サーキットについたのに仲間と談笑していたら日が暮れていた</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q24">
+                    <label for="q24">走行後の清掃が面倒で放置（最終的にはしっかりやる）</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q25">
+                    <label for="q25">「もう一回だけ」がやめられない</label>
+                </li>
+            </ul>
+
+            <!-- コミュニティあるある -->
+            <h2 class="section-title">👥 コミュニティあるある</h2>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="q26">
+                    <label for="q26">仲間の機体を見て「欲しい...」となる</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q27">
+                    <label for="q27">ラジコン仲間と話すと時間を忘れる</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q28">
+                    <label for="q28">SNS関係の7割がラジコンで埋まっている</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q29">
+                    <label for="q29">家族に「...また買ったの？」と言われる（怪訝な顔、笑顔、どちらでもカウントします）</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="q30">
+                    <label for="q30">ラジコンの話をし始めると止まらない</label>
+                </li>
+            </ul>
+
+            <button class="result-btn" onclick="showResult()">結果を見る</button>
+        </div>
+
+        <div id="result">
+            <div class="result-score" id="score"></div>
+            <div class="result-level" id="level"></div>
+            <div class="result-comment" id="comment"></div>
+
+            <div class="share-buttons">
+                <button class="share-btn" onclick="shareTwitter()">𝕏 でシェア</button>
+                <button class="share-btn" onclick="shareLine()">LINE でシェア</button>
+                <button class="share-btn" onclick="shareFacebook()">Facebook でシェア</button>
+                <button class="share-btn" onclick="copyURL()">🔗 URLコピー</button>
+            </div>
+
+            <button class="back-btn" onclick="backToTop()">もう一度チェックする</button>
+        </div>
+
+        <!-- 他のゲームへのリンク -->
+        <div class="other-games">
+            <h3>🎮 ぽすとそにが作った他のゲーム</h3>
+            <div class="game-links">
+                <a href="https://postsoni.github.io/rc-chassis-personality-quiz/" class="game-link" target="_blank">
+                    <div class="game-link-title">🏎️ RCシャーシ性格診断</div>
+                    <div class="game-link-desc">あなたにピッタリのシャーシは？</div>
+                </a>
+                <a href="https://postsoni.github.io/rc-gacha/" class="game-link" target="_blank">
+                    <div class="game-link-title">🎰 RC PARTS GACHA</div>
+                    <div class="game-link-desc">パーツをガチャで集めよう！</div>
+                </a>
+                <a href="https://postsoni.github.io/rc-quiz/" class="game-link" target="_blank">
+                    <div class="game-link-title">🚀 RCクイズ</div>
+                    <div class="game-link-desc">ラジコン知識を試そう！</div>
+                </a>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2025 ぽすとそに工房 (Postsoni Workshop)</p>
+            <p>All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        function showResult() {
+            // チェックされた数を数える
+            let count = 0;
+            for (let i = 1; i <= 30; i++) {
+                if (document.getElementById('q' + i).checked) {
+                    count++;
+                }
+            }
+
+            // 結果の判定
+            let level = '';
+            let comment = '';
+
+            if (count >= 0 && count <= 5) {
+                level = '初級者';
+                comment = 'まだまだこれから！';
+            } else if (count >= 6 && count <= 10) {
+                level = 'RC民見習い';
+                comment = '順調に沼にハマってます';
+            } else if (count >= 11 && count <= 15) {
+                level = '立派なRC民';
+                comment = 'もう引き返せません';
+            } else if (count >= 16 && count <= 20) {
+                level = 'RC中毒';
+                comment = '完全に沼の中';
+            } else if (count >= 21 && count <= 25) {
+                level = '模型部屋の住人';
+                comment = '部屋から出るときは衣食住とラジコンと仕事だけ';
+            } else if (count >= 26 && count <= 30) {
+                level = 'ぽすとそにレベル';
+                comment = 'いい酒が飲めそうですねｗｗ(笑)';
+            }
+
+            // 結果を表示
+            document.getElementById('score').textContent = count + '個 / 30個';
+            document.getElementById('level').textContent = level;
+            document.getElementById('comment').textContent = comment;
+
+            // チェックリストを非表示、結果を表示
+            document.getElementById('checklist-container').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+
+            // ページトップにスクロール
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function backToTop() {
+            document.getElementById('checklist-container').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function shareTwitter() {
+            const count = document.getElementById('score').textContent;
+            const level = document.getElementById('level').textContent;
+            const text = `RCあるある共感チェック\n結果：${count}\nレベル：${level}\n#ラジコンあるある`;
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`, '_blank');
+        }
+
+        function shareLine() {
+            const count = document.getElementById('score').textContent;
+            const level = document.getElementById('level').textContent;
+            const text = `RCあるある共感チェック\n結果：${count}\nレベル：${level}\n#ラジコンあるある`;
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://line.me/R/msg/text/?${encodeURIComponent(text + '\n' + window.location.href)}`, '_blank');
+        }
+
+        function shareFacebook() {
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+        }
+
+        function copyURL() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                alert('URLをコピーしました！');
+            });
+        }
+    </script>
+</body>
+</html>
